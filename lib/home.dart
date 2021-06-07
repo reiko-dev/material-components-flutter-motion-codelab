@@ -776,5 +776,3 @@ class _ReplyFabState extends State<_ReplyFab>
     );
   }
 }
-
-// TODO: Add Fade through transition between compose and reply FAB (Motion)
