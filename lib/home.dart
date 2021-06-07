@@ -7,6 +7,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:reply/model/router_provider.dart';
 
+import 'package:animations/animations.dart';
+
 import 'bottom_drawer.dart';
 import 'colors.dart';
 import 'compose_page.dart';
@@ -723,7 +725,7 @@ class _ReplyFabState extends State<_ReplyFab>
       selector: (context, emailStore) => emailStore.onMailView,
       builder: (context, onMailView, child) {
         // TODO: Add Fade through transition between compose and reply FAB (Motion)
-        final fabSwitcher = onMailView
+        final fabSwitcherIcon = onMailView
             ? Icon(
                 Icons.reply_all,
                 color: Colors.black,
@@ -735,40 +737,40 @@ class _ReplyFabState extends State<_ReplyFab>
         final tooltip = onMailView ? 'Reply' : 'Compose';
 
         // TODO: Add Container Transform from FAB to compose email page (Motion)
-        return Material(
-          color: theme.colorScheme.secondary,
-          shape: circleFabBorder,
-          child: Tooltip(
-            message: tooltip,
-            child: InkWell(
-              customBorder: circleFabBorder,
-              onTap: () {
-                Provider.of<EmailStore>(
-                  context,
-                  listen: false,
-                ).onCompose = true;
-
-                Navigator.of(context).push(
-                  PageRouteBuilder(
-                    pageBuilder: (
-                      BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
-                    ) {
-                      return const ComposePage();
-                    },
+        return OpenContainer(
+          openBuilder: (context, closedContainer) {
+            return const ComposePage();
+          },
+          openColor: theme.cardColor,
+          onClosed: (succes) {
+            Provider.of<EmailStore>(
+              context,
+              listen: false,
+            ).onCompose = false;
+          },
+          closedShape: circleFabBorder,
+          closedColor: theme.colorScheme.secondary,
+          closedElevation: 6,
+          closedBuilder: (context, openContainer) {
+            return Tooltip(
+              message: tooltip,
+              child: InkWell(
+                customBorder: circleFabBorder,
+                onTap: () {
+                  Provider.of<EmailStore>(context, listen: false).onCompose =
+                      true;
+                  openContainer();
+                },
+                child: SizedBox(
+                  height: _mobileFabDimension,
+                  width: _mobileFabDimension,
+                  child: Center(
+                    child: fabSwitcherIcon,
                   ),
-                );
-              },
-              child: SizedBox(
-                height: _mobileFabDimension,
-                width: _mobileFabDimension,
-                child: Center(
-                  child: fabSwitcher,
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
